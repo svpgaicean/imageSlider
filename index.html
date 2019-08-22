@@ -12,19 +12,22 @@
   <body>
     <h1>Image gallery example</h1>
 
-    <div class="full-img">
-      <img class="displayed-img" src="images/pic1.jpg">
-      <div class="overlay"></div>
-      <button id="button" class="dark">Darken</button>
-    </div>
+		<div class="container">
+			<div class="slider">
+				<img src="images/pic5.jpg" id="last">
+				<img src="images/pic1.jpg">
+				<img src="images/pic2.jpg">
+				<img src="images/pic3.jpg">
+				<img src="images/pic4.jpg">
+				<img src="images/pic5.jpg">
+				<img src="images/pic1.jpg" id="first">
+			</div>
 
-    <div class="thumb-bar">
+		</div>	
 
-
-		</div>
-		
-		<button class="back">Back</button>
-		<button class="frwd">Forward</button>
+    <div class="thumb-bar"></div>
+		<button class="prevBtn">Previous</button>
+		<button class="nextBtn">Next</button>
 
     <script src="main.js"></script>
   </body>
