@@ -3,8 +3,8 @@ var thumbBar = document.querySelector('.thumb-bar');
 const slider = document.querySelector('.slider');
 const images = document.querySelectorAll('.slider img');
 
-const transitionScheme = 'transform 1.5s ease-in-out';
-// const transitionScheme = 'transform 0.5s ease-in-out';
+// const transitionScheme = 'transform 1.5s ease-in-out';
+const transitionScheme = 'transform 0.5s ease-in-out';
 
 // Buttons
 var nextBtn = document.querySelector('.nextBtn');
@@ -12,34 +12,36 @@ var prevBtn = document.querySelector('.prevBtn');
 
 // Counter
 let counter = 1;
+const initSize = images[0].clientWidth/2;
 const size = images[0].clientWidth;
-slider.style.transform = 'translateX(' + (-size * counter) + 'px)';
+
+slider.style.transform = 'translateX(' + (-initSize * counter) + 'px)';
 
 // Button Listeners
 nextBtn.addEventListener('click', () => {
 	if (counter >= images.length - 1) return;	
 	slider.style.transition = transitionScheme; 
 	counter++;
-	slider.style.transform = 'translateX(' + (-size * counter) + 'px)';
+	slider.style.transform = 'translateX(' + ((-size * counter)+initSize) + 'px)';
 });
 
 prevBtn.addEventListener('click', () => {
 	if (counter <= 0) return;	
 	slider.style.transition = transitionScheme; 
 	counter--;
-	slider.style.transform = 'translateX(' + (-size * counter) + 'px)';
+	slider.style.transform = 'translateX(' + ((-size * counter)+initSize) + 'px)';
 });
 
 slider.addEventListener('transitionend', () => {
 	if (images[counter].id === 'last') {
 		slider.style.transition = 'none';
 		counter = images.length - 2; // minus the first and last clone
-		slider.style.transform = 'translateX(' + (-size * counter) + 'px)';
+		slider.style.transform = 'translateX(' + ((-size * counter)+initSize) + 'px)';
 	}
 	if (images[counter].id === 'first') {
 		slider.style.transition = 'none';
 		counter = images.length - counter; // plus the first and last clone
-		slider.style.transform = 'translateX(' + (-size * counter) + 'px)';
+		slider.style.transform = 'translateX(' + ((-size * counter)+initSize) + 'px)';
 	}
 })
 
