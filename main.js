@@ -1,5 +1,5 @@
 const thumbBar = document.querySelector('.thumb-bar');
-const dots = document.querySelector('.dots');
+const dotBar = document.querySelector('.dot-bar');
 
 const slider = document.querySelector('.slider');
 const images = document.querySelectorAll('.slider img');
@@ -20,16 +20,14 @@ slider.style.transform = 'translateX(' + (-initSize * counter) + 'px)';
 
 // Button Listeners
 nextBtn.addEventListener('click', () => {
-	// if (counter >= images.length - 1) return;	
-	if (counter >= images.length -1) counter = 1;
+	if (counter >= images.length - 1) return;	
 	slider.style.transition = transitionScheme; 
 	counter++;
 	slider.style.transform = 'translateX(' + ((-size * counter)+initSize) + 'px)';
 });
 
 prevBtn.addEventListener('click', () => {
-	// if (counter <= 0) return;	
-	if (counter <= 0) counter = 5;
+	if (counter <= 0) return; 
 	slider.style.transition = transitionScheme; 
 	counter--;
 	slider.style.transform = 'translateX(' + ((-size * counter)+initSize) + 'px)';
@@ -60,7 +58,7 @@ for (let i = 1; i <= 5; i++) {
 	// dots elements
 	const newDot = document.createElement('span');
   newDot.setAttribute('class', `dot idx${i}`);
-	dots.appendChild(newDot);
+	dotBar.appendChild(newDot);
 	newDot.addEventListener('click', renderImg);
 }
 
@@ -80,6 +78,24 @@ function renderImg(e) {
 		// do nothing
 	}
 }
+
+function toggleActiveDot() {
+	let dots = document.getElementsByClassName('dot');
+	let displayIdx = counter;
+
+  for (let i = 0; i < dots.length; i++) {
+      dots[i].className = dots[i].className.replace(" active", "");
+	}
+	if (counter > 5) {
+		displayIdx = 1;
+	}
+	else if (counter < 1) {
+		displayIdx = 5;
+	}
+	dots[displayIdx-1].className += " active";
+}
+
+slider.addEventListener('transitionstart', toggleActiveDot);
 
 // /* Wiring up the Darken/Lighten button */
 // function changeBrightness() {
