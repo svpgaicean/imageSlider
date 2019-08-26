@@ -1,4 +1,5 @@
-var thumbBar = document.querySelector('.thumb-bar');
+const thumbBar = document.querySelector('.thumb-bar');
+const dots = document.querySelector('.dots');
 
 const slider = document.querySelector('.slider');
 const images = document.querySelectorAll('.slider img');
@@ -19,14 +20,16 @@ slider.style.transform = 'translateX(' + (-initSize * counter) + 'px)';
 
 // Button Listeners
 nextBtn.addEventListener('click', () => {
-	if (counter >= images.length - 1) return;	
+	// if (counter >= images.length - 1) return;	
+	if (counter >= images.length -1) counter = 1;
 	slider.style.transition = transitionScheme; 
 	counter++;
 	slider.style.transform = 'translateX(' + ((-size * counter)+initSize) + 'px)';
 });
 
 prevBtn.addEventListener('click', () => {
-	if (counter <= 0) return;	
+	// if (counter <= 0) return;	
+	if (counter <= 0) counter = 5;
 	slider.style.transition = transitionScheme; 
 	counter--;
 	slider.style.transform = 'translateX(' + ((-size * counter)+initSize) + 'px)';
@@ -46,45 +49,37 @@ slider.addEventListener('transitionend', () => {
 })
 
 /* Looping through images */
-// for (let i = 1; i <= 5; i++) {
-//   var newImage = document.createElement('img');
-//   newImage.setAttribute('src', `./images/pic${i}.jpg`);
-// 	thumbBar.appendChild(newImage);
-// 	newImage.addEventListener('click', renderImg);
-// }
+for (let i = 1; i <= 5; i++) {
+	// thumbBar elements
+	const newImage = document.createElement('img');
+	newImage.setAttribute('src', `./images/pic${i}.jpg`);
+	newImage.setAttribute('class', `idx${i}`);
+	thumbBar.appendChild(newImage);
+	newImage.addEventListener('click', renderImg);
 
-// function renderImg(e) {
-// 	let src = e.target.getAttribute('src');
-// 	displayedImage.setAttribute('src', `${src}`);
-// }
+	// dots elements
+	const newDot = document.createElement('span');
+  newDot.setAttribute('class', `dot idx${i}`);
+	dots.appendChild(newDot);
+	newDot.addEventListener('click', renderImg);
+}
 
-// function renderBck() {
-// 	let src = displayedImage.getAttribute('src');
-// 	let pos = src.charAt(src.search(/[0-9]/));
-
-// 	if (pos == 1) {
-// 		displayedImage.setAttribute('src', './images/pic5.jpg')
-// 	}
-// 	else {
-// 		displayedImage.setAttribute('src', `./images/pic${--pos}.jpg`);
-// 	}
-// }
-
-// function renderFwd() {
-// 	let src = displayedImage.getAttribute('src');
-// 	let pos = src.charAt(src.search(/[0-9]/));
-
-// 	if (pos == 5) {
-// 		displayedImage.setAttribute('src', './images/pic1.jpg')
-// 	}
-// 	else {
-// 		displayedImage.setAttribute('src', `./images/pic${++pos}.jpg`);
-// 	}
-// }
-
-// btn_back.addEventListener('click', renderBck);
-// btn_frwd.addEventListener('click', renderFwd);
-
+function renderImg(e) {
+	let src = e.target.getAttribute('class');
+	let pos = src.charAt(src.search(/[0-9]+/));
+	// console.log(`pos-counter = ${pos-counter} .. ${Math.floor(5/2)}`);
+	if (pos > counter) {
+		while (counter < pos) {
+			nextBtn.click();
+		}
+	} else if (pos < counter) {
+		while (counter > pos) {
+			prevBtn.click();
+		}
+	} else {
+		// do nothing
+	}
+}
 
 // /* Wiring up the Darken/Lighten button */
 // function changeBrightness() {
