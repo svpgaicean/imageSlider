@@ -14,6 +14,7 @@ body {
 }
 
 .container {
+	position: relative;
 	width: 1280px;
 	margin: auto;
 	overflow: hidden;
@@ -37,10 +38,10 @@ body {
 }
 
 .dot-bar {
-	display: flex;
-	justify-content: center;
-	margin-bottom: 10px;
-	margin-top: -580px;
+	position: absolute;
+	transform: translateX(-50%);
+	left: 50%;
+	bottom: 5%;
 }
 .dot {
   cursor: pointer;
@@ -51,7 +52,6 @@ body {
   border-radius: 50%;
   display: inline-block;
   transition: background-color 0.6s ease;
-	z-index: 1;
 }
 
 .active {
@@ -59,31 +59,32 @@ body {
 }
 
 .container button {
-	position: relative;
-	top: -740px;
+	position: absolute;
 	background: none;
 	border: none;
 	font-size: 60px;
 	font-style: normal;
+	top: 50%;
+	transform: translateY(-50%);
 	outline: none;
 }
 .prevBtn {
-	left: 25.5%;
+	left: 26%;
 }
 .nextBtn {
-	left: 68%; 
+	right: 26%; 
 }
 
 .overlay {
 	display: flex;
-	position: relative;
-	top: -480px;
+	position: absolute;
+	top: 0;
+	left: 0;
 	height: 480px;
 	width: 1280px;
 }
 .overlay-left {
 	width: calc(640px/2);
-	z-index: 1;
 	background: rgba(0, 0, 0, 0.5);
 }
 .overlay-mid {
@@ -91,6 +92,5 @@ body {
 }
 .overlay-right {
 	width: calc(640px/2);
-	z-index: 1;
 	background: rgba(0, 0, 0, 0.5);
 }
