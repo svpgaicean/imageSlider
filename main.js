@@ -57,7 +57,11 @@ for (let i = 1; i <= 5; i++) {
 
 	// dots elements
 	const newDot = document.createElement('span');
-  newDot.setAttribute('class', `dot idx${i}`);
+	if (i === 1) {
+		newDot.setAttribute('class', `dot idx${i} active`);
+	} else {
+		newDot.setAttribute('class', `dot idx${i}`);
+	}
 	dotBar.appendChild(newDot);
 	newDot.addEventListener('click', renderImg);
 }
@@ -82,10 +86,10 @@ function renderImg(e) {
 function toggleActiveDot() {
 	let dots = document.getElementsByClassName('dot');
 	let displayIdx = counter;
+	let activeDot = document.getElementsByClassName('dot active');
 
-  for (let i = 0; i < dots.length; i++) {
-      dots[i].className = dots[i].className.replace(" active", "");
-	}
+	activeDot[0].className = activeDot[0].className.replace(" active", "");
+
 	if (counter > 5) {
 		displayIdx = 1;
 	}
