@@ -1,6 +1,6 @@
+'use strict';
 const thumbBar = document.querySelector('.thumb-bar');
 const dotBar = document.querySelector('.dot-bar');
-
 const slider = document.querySelector('.slider');
 const images = document.querySelectorAll('.slider img');
 
@@ -15,7 +15,7 @@ var prevBtn = document.querySelector('.prevBtn');
 let counter = 1;
 const initSize = images[0].clientWidth/2;
 const size = images[0].clientWidth;
-
+// initial positioning of main display image
 slider.style.transform = 'translateX(' + (-initSize * counter) + 'px)';
 
 // Button Listeners
@@ -95,6 +95,7 @@ function toggleActiveDot() {
 	dots[displayIdx-1].className += " active";
 }
 
+toggleActiveDot();
 slider.addEventListener('transitionstart', toggleActiveDot);
 
 // /* Wiring up the Darken/Lighten button */
