@@ -99,7 +99,6 @@ function toggleActiveDot() {
 	dots[displayIdx-1].className += " active";
 }
 
-toggleActiveDot();
 slider.addEventListener('transitionstart', toggleActiveDot);
 
 // /* Wiring up the Darken/Lighten button */
