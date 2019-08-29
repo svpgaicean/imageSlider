@@ -9,25 +9,78 @@ h1 {
   text-align: center;
 }
 
+body {
+	background: #eee;
+}
+
 .container {
+	position: relative;
 	width: 1280px;
 	margin: auto;
 	overflow: hidden;
-	border: 5px solid black;
+}
+
+.container button {
+	position: absolute;
+	background: none;
+	border: none;
+	font-size: 60px;
+	font-style: normal;
+	top: 50%;
+	transform: translateY(-50%);
+	outline: none;
+}
+.prevBtn {
+	left: 26%;
+}
+.nextBtn {
+	right: 26%; 
+}
+
+.container::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 320px;
+	height: 480px;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 1;
+}
+.container::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 320px;
+	height: 480px;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 1;
 }
 
 .slider {
 	display: flex;
 	height: 480px;
 }
-
-.thumb-bar img {
-  display: block;
-  width: 150px;
-  float: left;
-  cursor: pointer;
+.slider img {
+	z-index: -1;
 }
 
+.thumb-bar {
+	display: flex;
+	justify-content: center;
+}
+.thumb-bar img {
+  width: 150px;
+	cursor: pointer;
+}
+
+.dot-bar {
+	position: absolute;
+	transform: translateX(-50%);
+	left: 50%;
+	bottom: 5%;
+}
 .dot {
   cursor: pointer;
   height: 15px;
@@ -38,7 +91,6 @@ h1 {
   display: inline-block;
   transition: background-color 0.6s ease;
 }
-
 .active {
 	background-color: #9C0000;
 }

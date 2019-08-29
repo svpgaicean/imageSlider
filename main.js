@@ -1,6 +1,6 @@
+'use strict';
 const thumbBar = document.querySelector('.thumb-bar');
 const dotBar = document.querySelector('.dot-bar');
-
 const slider = document.querySelector('.slider');
 const images = document.querySelectorAll('.slider img');
 
@@ -15,7 +15,7 @@ var prevBtn = document.querySelector('.prevBtn');
 let counter = 1;
 const initSize = images[0].clientWidth/2;
 const size = images[0].clientWidth;
-
+// initial positioning of main display image
 slider.style.transform = 'translateX(' + (-initSize * counter) + 'px)';
 
 // Button Listeners
@@ -57,7 +57,11 @@ for (let i = 1; i <= 5; i++) {
 
 	// dots elements
 	const newDot = document.createElement('span');
-  newDot.setAttribute('class', `dot idx${i}`);
+	if (i === 1) {
+		newDot.setAttribute('class', `dot idx${i} active`);
+	} else {
+		newDot.setAttribute('class', `dot idx${i}`);
+	}
 	dotBar.appendChild(newDot);
 	newDot.addEventListener('click', renderImg);
 }
@@ -82,10 +86,10 @@ function renderImg(e) {
 function toggleActiveDot() {
 	let dots = document.getElementsByClassName('dot');
 	let displayIdx = counter;
+	let activeDot = document.getElementsByClassName('dot active');
 
-  for (let i = 0; i < dots.length; i++) {
-      dots[i].className = dots[i].className.replace(" active", "");
-	}
+	activeDot[0].className = activeDot[0].className.replace(" active", "");
+
 	if (counter > 5) {
 		displayIdx = 1;
 	}
