@@ -18,6 +18,12 @@ body {
 	width: 1280px;
 	margin: auto;
 	overflow: hidden;
+	/* border: 2px solid yellow; */
+}
+.container2 {
+	position: relative;
+	width: 1280px;
+	margin: auto;
 }
 
 .container button {
@@ -64,14 +70,18 @@ body {
 }
 .slider img {
 	z-index: -1;
+	/* border: 3px solid blue; */
+	width: 640px;
 }
 
 .thumb-bar {
+	position: absolute;
 	display: flex;
-	justify-content: center;
+	width: 1280px;
 }
 .thumb-bar img {
-  width: 150px;
+	flex-shrink: 1;
+	width: 150px;
 	cursor: pointer;
 }
 
