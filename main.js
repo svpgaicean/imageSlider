@@ -6,16 +6,16 @@ const slider = document.querySelector('.slider');
 let size; // image width
 let initSize;
 
-let count = 10; // hardcoded for now
+let imgCount = 10; // hardcoded for now
 function parseImages(count) {
 	for (let i = 1; i <= count; i++) {
 		const newThumbImg = document.createElement('img');
 		const newSliderImg = document.createElement('img');
 		const newDot = document.createElement('span');
 
-		newThumbImg.setAttribute('src', `./images/pic${i}.jpg`)
+		newThumbImg.setAttribute('src', `./images/pic${i}.jpg`);
 		newThumbImg.setAttribute('class', `idx${i}`);
-		newSliderImg.setAttribute('src', `./images/pic${i}.jpg`)
+		newSliderImg.setAttribute('src', `./images/pic${i}.jpg`);
 		if (i === 1) {
 			newDot.setAttribute('class', `dot idx${i} active`);
 		} else {
@@ -30,13 +30,15 @@ function parseImages(count) {
 		slider.appendChild(newSliderImg);
 	}
 }
-parseImages(10);
+parseImages(imgCount);
 
 const images = document.querySelectorAll('.slider img');
 
 images[0].addEventListener('load', () => {
 	size = images[0].clientWidth;
 	initSize = -(size + size/2);
+	// initSize = -size/2;
+	slider.prepend(slider.lastElementChild);
 	slider.prepend(slider.lastElementChild);
 	slider.style.transform = `translateX(${initSize}px)`;
 });
@@ -55,25 +57,31 @@ let direction;
 // Button Listeners
 nextBtn.addEventListener('click', () => {
 	direction = -1;
+	paused = true;
+	setInterval( () => paused = false, 5000 );
 	slider.style.transition = transitionScheme; 
-	counter++;
+	// counter++;
 	amount = direction * size + initSize;
 	slider.style.transform = `translateX(${amount}px)`;
 });
 
 prevBtn.addEventListener('click', () => {
 	direction = 1;
+	paused = true;
+	setInterval( () => paused = false, 5000 );
 	slider.style.transition = transitionScheme; 
-	counter--;
+	// counter--;
 	amount = direction * size + initSize;
 	slider.style.transform = `translateX(${amount}px)`;
 });
 
 slider.addEventListener('transitionend', () => {
-	if (direction === 1) {
+	if (direction === 1) { // backwards
 		slider.prepend(slider.lastElementChild);
-	} else if (direction === -1) {
+		counter--;
+	} else if (direction === -1) { // forwards
 		slider.appendChild(slider.firstElementChild);
+		counter++;
 	}
 
 	slider.style.transition = 'none';
@@ -99,20 +107,30 @@ function renderImg(e) {
 	}
 }
 
-function toggleActiveDot() {
+function toggleActiveDot(counter, imgCount) {
 	let dots = document.getElementsByClassName('dot');
-	let displayIdx = counter;
+	let displayIdx;
 	let activeDot = document.getElementsByClassName('dot active');
 
 	activeDot[0].className = activeDot[0].className.replace(" active", "");
 
-	if (counter > 10) {
-		displayIdx = 1;
+	if (counter >= 0) {
+		displayIdx = Math.abs(counter) % imgCount;
 	}
-	else if (counter < 1) {
-		displayIdx = 10;
+	else if (counter < 0) {
+		displayIdx = imgCount - (Math.abs(counter) % imgCount);
+		if (displayIdx === imgCount) displayIdx = 0;
 	}
-	dots[displayIdx-1].className += " active";
+	dots[displayIdx].className += " active";
 }
 
-slider.addEventListener('transitionstart', toggleActiveDot);
+slider.addEventListener('transitionend', () => {
+	toggleActiveDot(counter, imgCount);
+});
+
+
+// auto slide 5 sec 
+let paused = false;
+let interval = setInterval( () => {
+	(!paused) && nextBtn.click();
+}, 5000);
