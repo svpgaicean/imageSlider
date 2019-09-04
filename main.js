@@ -2,6 +2,7 @@
 const thumbBar = document.querySelector('.thumb-bar');
 const dotBar = document.querySelector('.dot-bar');
 const slider = document.querySelector('.slider');
+const container = document.querySelector('.container');
 
 let size; // image width
 let initSize;
@@ -128,6 +129,26 @@ slider.addEventListener('transitionend', () => {
 	toggleActiveDot(counter, imgCount);
 });
 
+container.insertAdjacentHTML('beforeend',
+'<p class="current-image"></p>');
+
+const p = document.querySelector('.current-image');
+function toggleActive(counter, imgCount) {
+	let displayIdx;
+
+	if (counter >= 0) {
+		displayIdx = Math.abs(counter) % imgCount;
+	}
+	else if (counter < 0) {
+		displayIdx = imgCount - (Math.abs(counter) % imgCount);
+		if (displayIdx === imgCount) displayIdx = 0;
+	}
+	p.textContent = `Image ${displayIdx + 1} of ${imgCount}`;
+}
+
+slider.addEventListener('transitionend', () => {
+	toggleActive(counter, imgCount);
+});
 
 // auto slide 5 sec 
 let paused = false;
