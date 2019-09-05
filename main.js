@@ -58,8 +58,6 @@ let direction;
 // Button Listeners
 nextBtn.addEventListener('click', () => {
 	direction = -1;
-	paused = true;
-	setInterval( () => paused = false, 5000 );
 	slider.style.transition = transitionScheme; 
 	// counter++;
 	amount = direction * size + initSize;
@@ -68,8 +66,6 @@ nextBtn.addEventListener('click', () => {
 
 prevBtn.addEventListener('click', () => {
 	direction = 1;
-	paused = true;
-	setInterval( () => paused = false, 5000 );
 	slider.style.transition = transitionScheme; 
 	// counter--;
 	amount = direction * size + initSize;
@@ -131,8 +127,9 @@ slider.addEventListener('transitionend', () => {
 
 container.insertAdjacentHTML('beforeend',
 '<p class="current-image"></p>');
-
 const p = document.querySelector('.current-image');
+p.textContent = `Image ${1} of ${imgCount}`;
+
 function toggleActive(counter, imgCount) {
 	let displayIdx;
 
@@ -150,8 +147,86 @@ slider.addEventListener('transitionend', () => {
 	toggleActive(counter, imgCount);
 });
 
-// auto slide 5 sec 
-let paused = false;
-let interval = setInterval( () => {
-	(!paused) && nextBtn.click();
-}, 5000);
+// --- autoslide ---
+let intervalId;
+
+function autoSlide() {
+	intervalId = setInterval(nextSlide, 5000);
+}
+
+function nextSlide() {
+	nextBtn.click();
+}
+
+function pauseSlide() {
+	clearInterval(intervalId);
+	autoSlide();
+}
+
+nextBtn.addEventListener('click', pauseSlide);
+prevBtn.addEventListener('click', pauseSlide);
+window.addEventListener('load', autoSlide);
+
+// ------- AJAX ------
+// const xhr = new XMLHttpRequest;
+// xhr.onreadystatechange = function () {
+// 	if (xhr.readyState === 4) {
+// 		if (xhr.status === 200) {
+// 			console.log(xhr.responseText);
+// 		}
+		
+// 		if (xhr.status === 404) {
+// 			console.log('File or resource not found');
+// 		}
+// 	}
+// }
+// xhr.open('get', 'http://localhost:5000/images');
+// xhr.send();
+
+// --------- AJAX promise version ---------
+function getJSON(url) {
+	return new Promise(function(resolve, reject) {
+		const xhr = new XMLHttpRequest;
+
+		xhr.onload = function() { // 404 goes here aswell
+			resolve(this);
+		};
+
+		xhr.onerror = function() {
+			reject(new Error("Network error"));
+		}
+
+		xhr.open('get', url);
+		xhr.send();
+	});
+}
+
+getJSON("http://localhost:5000/images")
+	// .then(getXHR)
+	.then(parseJSON)
+	.catch(function (err) {
+		console.log(err);
+	})
+	.then(parseImages2)
+
+function parseJSON(xhr) {
+	if (xhr.status !== 200) {
+		console.log("File or resource not found");
+	} else {
+		try {
+			return JSON.parse(xhr.responseText);
+		} catch (err) {
+			console.log(err);
+		}
+	}
+}
+
+// rename to "generateSlider"
+function parseImages2(jsonData) {
+	const count = jsonData.data.length; 
+	for (let i = 0; i < count; i++) {
+		const newSliderImg = document.createElement('img');
+		newSliderImg.setAttribute('src', `${jsonData.data[i].url}`);
+		slider.appendChild(newSliderImg);
+	}
+}
