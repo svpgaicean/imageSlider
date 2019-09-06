@@ -152,21 +152,28 @@ function alignSliderImages(firstImage) {
 }
 
 function generateSlider(jsonData, count) {
-	for (let i = 0; i < count; i++) {
-		const newSliderImg = document.createElement('img');
-		newSliderImg.setAttribute('src', `${jsonData.data[i].url}`);
-		newSliderImg.setAttribute('alt', `${jsonData.data[i].name}`);
-		slider.appendChild(newSliderImg);
+	if (count === 0) {
+		// handle no image
 	}
-
-	// append clone elements to slider for correct behaviour 
-	const children = [...slider.children];
-	while (count < 5) {
-		const clones = children.map(child => child.cloneNode(true));
-		clones.forEach(clone => slider.appendChild(clone));
-		count += clones.length;
+	else if (count === 1) {
+		// handle one image
 	}
+	else {
+		for (let i = 0; i < count; i++) {
+			const newSliderImg = document.createElement('img');
+			newSliderImg.setAttribute('src', `${jsonData.data[i].url}`);
+			newSliderImg.setAttribute('alt', `${jsonData.data[i].name}`);
+			slider.appendChild(newSliderImg);
+		}
 
+		// append clone elements to slider for correct behaviour 
+		const children = [...slider.children];
+		while (count < 5) {
+			const clones = children.map(child => child.cloneNode(true));
+			clones.forEach(clone => slider.appendChild(clone));
+			count += clones.length;
+		}
+	}
 	return document.querySelectorAll('.slider img'); 
 }
 
