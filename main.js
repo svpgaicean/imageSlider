@@ -7,43 +7,6 @@ const container = document.querySelector('.container');
 let size; // image width
 let initSize;
 
-let imgCount = 10; // hardcoded for now
-function parseImages(count) {
-	for (let i = 1; i <= count; i++) {
-		const newThumbImg = document.createElement('img');
-		const newSliderImg = document.createElement('img');
-		const newDot = document.createElement('span');
-
-		newThumbImg.setAttribute('src', `./images/pic${i}.jpg`);
-		newThumbImg.setAttribute('class', `idx${i}`);
-		newSliderImg.setAttribute('src', `./images/pic${i}.jpg`);
-		if (i === 1) {
-			newDot.setAttribute('class', `dot idx${i} active`);
-		} else {
-			newDot.setAttribute('class', `dot idx${i}`);
-		}
-		
-		thumbBar.appendChild(newThumbImg);
-		newThumbImg.addEventListener('click', renderImg);
-		dotBar.appendChild(newDot);
-		newDot.addEventListener('click', renderImg);
-
-		slider.appendChild(newSliderImg);
-	}
-}
-parseImages(imgCount);
-
-const images = document.querySelectorAll('.slider img');
-
-images[0].addEventListener('load', () => {
-	size = images[0].clientWidth;
-	initSize = -(size + size/2);
-	// initSize = -size/2;
-	slider.prepend(slider.lastElementChild);
-	slider.prepend(slider.lastElementChild);
-	slider.style.transform = `translateX(${initSize}px)`;
-});
-
 const transitionScheme = 'transform 0.5s ease-in-out';
 
 // Buttons
@@ -104,86 +67,26 @@ function renderImg(e) {
 	}
 }
 
-function toggleActiveDot(counter, imgCount) {
-	let dots = document.getElementsByClassName('dot');
-	let displayIdx;
-	let activeDot = document.getElementsByClassName('dot active');
-
-	activeDot[0].className = activeDot[0].className.replace(" active", "");
-
-	if (counter >= 0) {
-		displayIdx = Math.abs(counter) % imgCount;
-	}
-	else if (counter < 0) {
-		displayIdx = imgCount - (Math.abs(counter) % imgCount);
-		if (displayIdx === imgCount) displayIdx = 0;
-	}
-	dots[displayIdx].className += " active";
-}
-
-slider.addEventListener('transitionend', () => {
-	toggleActiveDot(counter, imgCount);
-});
-
-container.insertAdjacentHTML('beforeend',
-'<p class="current-image"></p>');
-const p = document.querySelector('.current-image');
-p.textContent = `Image ${1} of ${imgCount}`;
-
-function toggleActive(counter, imgCount) {
-	let displayIdx;
-
-	if (counter >= 0) {
-		displayIdx = Math.abs(counter) % imgCount;
-	}
-	else if (counter < 0) {
-		displayIdx = imgCount - (Math.abs(counter) % imgCount);
-		if (displayIdx === imgCount) displayIdx = 0;
-	}
-	p.textContent = `Image ${displayIdx + 1} of ${imgCount}`;
-}
-
-slider.addEventListener('transitionend', () => {
-	toggleActive(counter, imgCount);
-});
-
-// --- autoslide ---
-let intervalId;
-
 function autoSlide() {
-	intervalId = setInterval(nextSlide, 5000);
+	let intervalId;
+	function resetInterval() {
+		intervalId = setInterval(nextSlide, 5000);
+	}
+
+	function nextSlide() {
+		nextBtn.click();
+	}
+
+	function pauseSlide() {
+		clearInterval(intervalId);
+		resetInterval();
+	}
+
+	nextBtn.addEventListener('click', pauseSlide);
+	prevBtn.addEventListener('click', pauseSlide);
+	window.addEventListener('load', resetInterval);
 }
 
-function nextSlide() {
-	nextBtn.click();
-}
-
-function pauseSlide() {
-	clearInterval(intervalId);
-	autoSlide();
-}
-
-nextBtn.addEventListener('click', pauseSlide);
-prevBtn.addEventListener('click', pauseSlide);
-window.addEventListener('load', autoSlide);
-
-// ------- AJAX ------
-// const xhr = new XMLHttpRequest;
-// xhr.onreadystatechange = function () {
-// 	if (xhr.readyState === 4) {
-// 		if (xhr.status === 200) {
-// 			console.log(xhr.responseText);
-// 		}
-		
-// 		if (xhr.status === 404) {
-// 			console.log('File or resource not found');
-// 		}
-// 	}
-// }
-// xhr.open('get', 'http://localhost:5000/images');
-// xhr.send();
-
-// --------- AJAX promise version ---------
 function getJSON(url) {
 	return new Promise(function(resolve, reject) {
 		const xhr = new XMLHttpRequest;
@@ -201,13 +104,15 @@ function getJSON(url) {
 	});
 }
 
-getJSON("http://localhost:5000/images")
-	// .then(getXHR)
-	.then(parseJSON)
-	.catch(function (err) {
-		console.log(err);
-	})
-	.then(parseImages2)
+function init() {
+	getJSON("http://localhost:5000/images")
+		.then(parseJSON)
+		.catch(function (err) {
+			console.log(err);
+		})
+		.then(generateElements)
+		.then(autoSlide)
+}
 
 function parseJSON(xhr) {
 	if (xhr.status !== 200) {
@@ -221,12 +126,89 @@ function parseJSON(xhr) {
 	}
 }
 
-// rename to "generateSlider"
-function parseImages2(jsonData) {
-	const count = jsonData.data.length; 
+function generateElements(jsonData) {
+	const imageCount = jsonData.data.length;
+	const sliderImages = generateSlider(jsonData, imageCount);
+	alignSliderImages(sliderImages[0]);
+	generateThumbBar(jsonData, imageCount);
+	toggleActive(counter, imageCount);
+
+	slider.addEventListener('transitionend', () => {
+		toggleActive(counter, imageCount);
+	});	
+
+	container.insertAdjacentHTML('beforeend', '<p class="image-name"></p>');
+	displaySliderImageName();
+	// console.log(jsonData.data[0].name);
+}
+
+function displaySliderImageName() {
+	const p = document.querySelector('.image-name');
+	p.textContent = `hello world`;
+}
+
+function alignSliderImages(firstImage) {
+	firstImage.addEventListener('load', () => {
+		size = firstImage.clientWidth;
+		initSize = -(size + size/2);
+		slider.prepend(slider.lastElementChild);
+		slider.prepend(slider.lastElementChild);
+		slider.style.transform = `translateX(${initSize}px)`;
+	});
+}
+
+function generateSlider(jsonData, count) {
 	for (let i = 0; i < count; i++) {
 		const newSliderImg = document.createElement('img');
 		newSliderImg.setAttribute('src', `${jsonData.data[i].url}`);
+		newSliderImg.setAttribute('alt', `${jsonData.data[i].name}`);
 		slider.appendChild(newSliderImg);
 	}
+
+	// append clone elements to slider for correct behaviour 
+	const children = [...slider.children];
+	while (count < 5) {
+		const clones = children.map(child => child.cloneNode(true));
+		clones.forEach(clone => slider.appendChild(clone));
+		count += clones.length;
+	}
+
+	return document.querySelectorAll('.slider img'); 
 }
+
+function generateThumbBar(jsonData, count) {
+	for (let i = 0; i < count; i++) {
+		const newThumbImg = document.createElement('img');
+		newThumbImg.setAttribute('src', `${jsonData.data[i].url}`);
+		newThumbImg.setAttribute('alt', `${jsonData.data[i].name}`);
+		if (i === 0) {
+			newThumbImg.setAttribute('class', ' active');
+		}
+		newThumbImg.addEventListener('click', renderImg);
+		thumbBar.appendChild(newThumbImg);
+	}
+}
+	
+// // ------ IMAGE X OF Y ------------------------
+container.insertAdjacentHTML('beforeend', '<p class="current-image"></p>');
+const p = document.querySelector('.current-image');
+// ------------------------------------------------
+
+function toggleActive(counter, imgCount) {
+	let images = document.querySelectorAll('.thumb-bar img');
+	let displayIdx;
+	let activeImage = document.getElementsByClassName("active");
+	activeImage[0].className = activeImage[0].className.replace(" active", "");
+
+	if (counter >= 0) {
+		displayIdx = Math.abs(counter) % imgCount;
+	}
+	else if (counter < 0) {
+		displayIdx = imgCount - (Math.abs(counter) % imgCount);
+		if (displayIdx === imgCount) displayIdx = 0;
+	}
+	images[displayIdx].className += " active";
+	p.textContent = `Image ${displayIdx + 1} of ${imgCount}`;
+}
+
+init();
