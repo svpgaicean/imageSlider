@@ -131,20 +131,14 @@ function generateElements(jsonData) {
 	const sliderImages = generateSlider(jsonData, imageCount);
 	alignSliderImages(sliderImages[0]);
 	generateThumbBar(jsonData, imageCount);
-	toggleActive(counter, imageCount);
 
-	slider.addEventListener('transitionend', () => {
-		toggleActive(counter, imageCount);
-	});	
-
+	container.insertAdjacentHTML('beforeend', '<p class="image-current"></p>');
 	container.insertAdjacentHTML('beforeend', '<p class="image-name"></p>');
-	displaySliderImageName();
-	// console.log(jsonData.data[0].name);
-}
-
-function displaySliderImageName() {
-	const p = document.querySelector('.image-name');
-	p.textContent = `hello world`;
+	container.insertAdjacentHTML('beforeend', '<p class="image-description"></p>');
+	toggleActive(jsonData, counter, imageCount);
+	slider.addEventListener('transitionend', () => {
+		toggleActive(jsonData, counter, imageCount);
+	});	
 }
 
 function alignSliderImages(firstImage) {
@@ -189,12 +183,10 @@ function generateThumbBar(jsonData, count) {
 	}
 }
 	
-// // ------ IMAGE X OF Y ------------------------
-container.insertAdjacentHTML('beforeend', '<p class="current-image"></p>');
-const p = document.querySelector('.current-image');
-// ------------------------------------------------
-
-function toggleActive(counter, imgCount) {
+function toggleActive(jsonData, counter, imgCount) {
+	const imgCurrent = document.querySelector('.image-current');
+	const imgName = document.querySelector('.image-name');
+	const imgDescr = document.querySelector('.image-description');
 	let images = document.querySelectorAll('.thumb-bar img');
 	let displayIdx;
 	let activeImage = document.getElementsByClassName("active");
@@ -208,7 +200,9 @@ function toggleActive(counter, imgCount) {
 		if (displayIdx === imgCount) displayIdx = 0;
 	}
 	images[displayIdx].className += " active";
-	p.textContent = `Image ${displayIdx + 1} of ${imgCount}`;
+	imgCurrent.textContent = `Image ${displayIdx + 1} of ${imgCount}`;
+	imgName.textContent = `${jsonData.data[displayIdx].name}`;
+	imgDescr.textContent = `${jsonData.data[displayIdx].short_description}`;
 }
 
 init();
