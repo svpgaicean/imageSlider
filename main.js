@@ -15,34 +15,71 @@ const prevBtn = document.querySelector('.prevBtn');
 
 // Counter
 let counter = 0;
+let moveAmount = 0;
 let amount;
 let direction;
+let imageCount;
 
 // Button Listeners
 nextBtn.addEventListener('click', () => {
-	direction = -1;
-	slider.style.transition = transitionScheme; 
-	// counter++;
-	amount = direction * size + initSize;
-	slider.style.transform = `translateX(${amount}px)`;
+  direction = -1;
+  counter += 1;
+  moveAmount += 1;
+  moveSlider();
 });
 
 prevBtn.addEventListener('click', () => {
-	direction = 1;
-	slider.style.transition = transitionScheme; 
-	// counter--;
-	amount = direction * size + initSize;
-	slider.style.transform = `translateX(${amount}px)`;
+  direction = 1;
+  counter -= 1;
+  moveAmount += 1;
+  moveSlider();
 });
 
+function moveSlider() {
+  slider.style.transition = transitionScheme;
+
+  // console.log(`dir ${direction} moveAm ${moveAmount}`);
+  amount = (direction * moveAmount * size) + initSize;
+
+  slider.style.transform = `translateX(${amount}px)`;
+}
+
+/** PROTOTYPE
+ *  an attempt to fix buggy translation when
+ *  doing a translation >= 8 slides
+ */
+// function moveSlider() {
+//   amount = (direction * (moveAmount-1) * size) + initSize;
+//   // amount = direction * moveAmount * size;
+//     console.log(`moveAm ${moveAmount}, size ${size}`);
+//   let x = counter; 
+//   slider.style.transition = 'none';
+//   while (moveAmount > 0) {
+//     slider.appendChild(slider.firstElementChild);
+//     moveAmount -= 1;
+//   }
+//   slider.style.transform = `translate(${initSize + (size*x)}px)`;
+//     console.log(
+//       `initSize ${initSize}
+//       size ${size}
+//       x ${x}`
+//     );
+
+// 	setTimeout( () => {
+//     slider.style.transition = transitionScheme;
+//     slider.style.transform = `translateX(${amount}px)`;
+// 	});
+// }
+
 slider.addEventListener('transitionend', () => {
-	if (direction === 1) { // backwards
-		slider.prepend(slider.lastElementChild);
-		counter--;
-	} else if (direction === -1) { // forwards
-		slider.appendChild(slider.firstElementChild);
-		counter++;
-	}
+  while (moveAmount > 0) {
+    if (direction === 1) { // backwards
+      slider.prepend(slider.lastElementChild);
+    } else if (direction === -1) { // forwards
+      slider.appendChild(slider.firstElementChild);
+    }
+      moveAmount -= 1;
+  }
 
 	slider.style.transition = 'none';
 	slider.style.transform = `translate(${initSize}px)`;
@@ -51,20 +88,48 @@ slider.addEventListener('transitionend', () => {
 	})
 });
 
+function getDisplayIndex(counter, imgCount) {
+  let displayIdx;
+
+	if (counter >= 0) {
+		displayIdx = Math.abs(counter) % imgCount;
+	} else if (counter < 0) {
+		displayIdx = imgCount - (Math.abs(counter) % imgCount);
+		if (displayIdx === imgCount) displayIdx = 0;
+  }
+
+  return displayIdx;
+}
+
 function renderImg(e) {
-	let src = e.target.getAttribute('class');
-	let pos = src.charAt(src.search(/[0-9]+/));
-	if (pos > counter) {
-		while (counter < pos) {
-			nextBtn.click();
-		}
-	} else if (pos < counter) {
-		while (counter > pos) {
-			prevBtn.click();
-		}
-	} else {
-		// do nothing
-	}
+  if (e) {
+    const currentImage = getDisplayIndex(counter, imageCount);
+    const chosenImage = whichChild(e.target);
+    const delta = chosenImage - currentImage;
+    counter += delta;
+
+    console.log(
+      `render: chosenImg ${chosenImage},
+      counter ${counter},
+      currentImg ${currentImage}`
+     );
+
+    moveAmount = chosenImage - currentImage;
+    if (moveAmount < 0) {
+      direction = 1;
+    } else if (moveAmount > 0) {
+      direction = -1;
+    }
+    moveAmount = Math.abs(moveAmount);
+    console.log(moveAmount);
+  }
+  moveSlider();
+}
+
+function whichChild(elem){
+  let i = 0;
+  while ((elem = elem.previousSibling) != null) i += 1;
+  return i;
 }
 
 function autoSlide() {
@@ -111,7 +176,7 @@ function init() {
 			console.log(err);
 		})
 		.then(generateElements)
-		.then(autoSlide)
+		// .then(autoSlide);
 }
 
 function parseJSON(xhr) {
@@ -127,7 +192,7 @@ function parseJSON(xhr) {
 }
 
 function generateElements(jsonData) {
-	const imageCount = jsonData.data.length;
+	imageCount = jsonData.data.length;
 	const sliderImages = generateSlider(jsonData, imageCount);
 	alignSliderImages(sliderImages[0]);
 	generateThumbBar(jsonData, imageCount);
@@ -154,11 +219,9 @@ function alignSliderImages(firstImage) {
 function generateSlider(jsonData, count) {
 	if (count === 0) {
 		// handle no image
-	}
-	else if (count === 1) {
+	}	else if (count === 1) {
 		// handle one image
-	}
-	else {
+	}	else {
 		for (let i = 0; i < count; i++) {
 			const newSliderImg = document.createElement('img');
 			newSliderImg.setAttribute('src', `${jsonData.data[i].url}`);
@@ -173,7 +236,8 @@ function generateSlider(jsonData, count) {
 			clones.forEach(clone => slider.appendChild(clone));
 			count += clones.length;
 		}
-	}
+  }
+  
 	return document.querySelectorAll('.slider img'); 
 }
 
@@ -194,18 +258,11 @@ function toggleActive(jsonData, counter, imgCount) {
 	const imgCurrent = document.querySelector('.image-current');
 	const imgName = document.querySelector('.image-name');
 	const imgDescr = document.querySelector('.image-description');
-	let images = document.querySelectorAll('.thumb-bar img');
-	let displayIdx;
-	let activeImage = document.getElementsByClassName("active");
+	const images = document.querySelectorAll('.thumb-bar img');
+  const displayIdx = getDisplayIndex(counter, imgCount);
+  const activeImage = document.getElementsByClassName("active");
+  
 	activeImage[0].className = activeImage[0].className.replace(" active", "");
-
-	if (counter >= 0) {
-		displayIdx = Math.abs(counter) % imgCount;
-	}
-	else if (counter < 0) {
-		displayIdx = imgCount - (Math.abs(counter) % imgCount);
-		if (displayIdx === imgCount) displayIdx = 0;
-	}
 	images[displayIdx].className += " active";
 	imgCurrent.textContent = `Image ${displayIdx + 1} of ${imgCount}`;
 	imgName.textContent = `${jsonData.data[displayIdx].name}`;
