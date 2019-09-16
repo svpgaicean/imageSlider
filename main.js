@@ -227,7 +227,7 @@ function generateElements(jsonData) {
   toggleActive(counter, imageCount);
   
 	slider.addEventListener('transitionend', () => {
-		toggleActive(jsonData, counter, imageCount);
+		toggleActive(counter, imageCount);
 	});	
 }
 
