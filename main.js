@@ -12,13 +12,35 @@ const transitionScheme = 'transform 0.5s ease-in-out';
 // Buttons
 const nextBtn = document.querySelector('.nextBtn');
 const prevBtn = document.querySelector('.prevBtn');
+const nextThumb = document.querySelector('.nextThumb');
+const prevThumb = document.querySelector('.prevThumb');
 
 // Counter
 let counter = 0;
 let moveAmount = 0;
-let amount;
 let direction;
 let imageCount;
+
+let thumbCount = 0;
+nextThumb.addEventListener('click', () => {
+  // 4 images displayed at 1st, so max 6 movements, hardcoded for now
+  if (thumbCount === 6) return;
+  else thumbCount += 1;
+
+  moveThumb();
+})
+prevThumb.addEventListener('click', () => {
+  if (thumbCount === 0) return;
+  else thumbCount -= 1;
+
+  moveThumb();
+})
+
+function moveThumb() {
+  thumbBar.style.transition = transitionScheme;
+  let amount = -(thumbCount * (640/4));
+  thumbBar.style.transform = `translateX(${amount}px)`;
+}
 
 // Button Listeners
 nextBtn.addEventListener('click', () => {
@@ -39,7 +61,7 @@ function moveSlider() {
   slider.style.transition = transitionScheme;
 
   // console.log(`dir ${direction} moveAm ${moveAmount}`);
-  amount = (direction * moveAmount * size) + initSize;
+  let amount = (direction * moveAmount * size) + initSize;
 
   slider.style.transform = `translateX(${amount}px)`;
 }
@@ -121,8 +143,9 @@ function renderImg(e) {
       direction = -1;
     }
     moveAmount = Math.abs(moveAmount);
-    console.log(moveAmount);
+    console.log(`moveAmount: ${moveAmount}`);
   }
+
   moveSlider();
 }
 
@@ -175,7 +198,7 @@ function init() {
 		.catch(function (err) {
 			console.log(err);
 		})
-		.then(generateElements)
+    .then(generateElements);
 		// .then(autoSlide);
 }
 
@@ -195,12 +218,14 @@ function generateElements(jsonData) {
 	imageCount = jsonData.data.length;
 	const sliderImages = generateSlider(jsonData, imageCount);
 	alignSliderImages(sliderImages[0]);
-	generateThumbBar(jsonData, imageCount);
-
+  generateThumbBar(jsonData, imageCount);
+ 
 	container.insertAdjacentHTML('beforeend', '<p class="image-current"></p>');
 	container.insertAdjacentHTML('beforeend', '<p class="image-name"></p>');
-	container.insertAdjacentHTML('beforeend', '<p class="image-description"></p>');
-	toggleActive(jsonData, counter, imageCount);
+  container.insertAdjacentHTML('beforeend', '<p class="image-description"></p>');
+  
+  toggleActive(counter, imageCount);
+  
 	slider.addEventListener('transitionend', () => {
 		toggleActive(jsonData, counter, imageCount);
 	});	
@@ -223,10 +248,28 @@ function generateSlider(jsonData, count) {
 		// handle one image
 	}	else {
 		for (let i = 0; i < count; i++) {
-			const newSliderImg = document.createElement('img');
-			newSliderImg.setAttribute('src', `${jsonData.data[i].url}`);
-			newSliderImg.setAttribute('alt', `${jsonData.data[i].name}`);
-			slider.appendChild(newSliderImg);
+      const sliderDiv = document.createElement('div');
+      const sliderImg = document.createElement('img');
+      const sliderImgName = document.createElement('p');
+      const sliderImgDescr = document.createElement('p');
+      const displayIdx = getDisplayIndex(i, count);
+
+      if (i === 0) {
+        sliderDiv.setAttribute('class', ' activeS');
+      }
+			sliderImg.setAttribute('src', `${jsonData.data[i].url}`);
+      sliderImg.setAttribute('alt', `${jsonData.data[i].name}`);
+      sliderImgName.setAttribute('class', 'img-name');
+      sliderImgDescr.setAttribute('class', 'img-description');
+      sliderImgName.textContent = `${jsonData.data[displayIdx].name}`;
+      sliderImgDescr.textContent = `${jsonData.data[displayIdx].short_description}`;
+      /** TODO: make text disappear if overflows in CSS
+       *  only show text on current active image
+       */
+			sliderDiv.appendChild(sliderImg);
+			sliderDiv.appendChild(sliderImgName);
+      sliderDiv.appendChild(sliderImgDescr);
+      slider.appendChild(sliderDiv);
 		}
 
 		// append clone elements to slider for correct behaviour 
@@ -247,26 +290,23 @@ function generateThumbBar(jsonData, count) {
 		newThumbImg.setAttribute('src', `${jsonData.data[i].url}`);
 		newThumbImg.setAttribute('alt', `${jsonData.data[i].name}`);
 		if (i === 0) {
-			newThumbImg.setAttribute('class', ' active');
+      newThumbImg.setAttribute('class', ' active');
 		}
 		newThumbImg.addEventListener('click', renderImg);
 		thumbBar.appendChild(newThumbImg);
 	}
 }
 	
-function toggleActive(jsonData, counter, imgCount) {
+function toggleActive(counter, imgCount) {
 	const imgCurrent = document.querySelector('.image-current');
-	const imgName = document.querySelector('.image-name');
-	const imgDescr = document.querySelector('.image-description');
-	const images = document.querySelectorAll('.thumb-bar img');
+  const images = document.querySelectorAll('.thumb-bar img');
   const displayIdx = getDisplayIndex(counter, imgCount);
   const activeImage = document.getElementsByClassName("active");
-  
+
 	activeImage[0].className = activeImage[0].className.replace(" active", "");
-	images[displayIdx].className += " active";
-	imgCurrent.textContent = `Image ${displayIdx + 1} of ${imgCount}`;
-	imgName.textContent = `${jsonData.data[displayIdx].name}`;
-	imgDescr.textContent = `${jsonData.data[displayIdx].short_description}`;
+  images[displayIdx].className += " active";
+
+  imgCurrent.textContent = `Image ${displayIdx + 1} of ${imgCount}`;
 }
 
 init();
