@@ -1,6 +1,6 @@
+(function() { 
 'use strict';
 const thumbBar = document.querySelector('.thumb-bar');
-const dotBar = document.querySelector('.dot-bar');
 const slider = document.querySelector('.slider');
 const container = document.querySelector('.container');
 
@@ -20,42 +20,52 @@ let counter = 0;
 let moveAmount = 0;
 let direction;
 let imageCount;
-
 let thumbCount = 0;
-nextThumb.addEventListener('click', () => {
-  // 4 images displayed at 1st, so max 6 movements, hardcoded for now
-  if (thumbCount === 6) return;
-  else thumbCount += 1;
 
-  moveThumb();
-})
-prevThumb.addEventListener('click', () => {
-  if (thumbCount === 0) return;
-  else thumbCount -= 1;
+function init() {
+	getJSON("http://localhost:5000/images")
+		.then(parseJSON)
+		.catch(function (err) {
+			console.log(err);
+		})
+    .then(generateElements);
+		// .then(autoSlide);
+}
 
-  moveThumb();
-})
+function getJSON(url) {
+	return new Promise(function(resolve, reject) {
+		const xhr = new XMLHttpRequest;
+
+		xhr.onload = function() { // 404 goes here aswell
+			resolve(this);
+		};
+
+		xhr.onerror = function() {
+			reject(new Error("Network error"));
+		}
+
+		xhr.open('get', url);
+		xhr.send();
+	});
+}
+
+function parseJSON(xhr) {
+	if (xhr.status !== 200) {
+		console.log("File or resource not found");
+	} else {
+		try {
+			return JSON.parse(xhr.responseText);
+		} catch (err) {
+			console.log(err);
+		}
+	}
+}
 
 function moveThumb() {
   thumbBar.style.transition = transitionScheme;
   let amount = -(thumbCount * (640/4));
   thumbBar.style.transform = `translateX(${amount}px)`;
 }
-
-// Button Listeners
-nextBtn.addEventListener('click', () => {
-  direction = -1;
-  counter += 1;
-  moveAmount += 1;
-  moveSlider();
-});
-
-prevBtn.addEventListener('click', () => {
-  direction = 1;
-  counter -= 1;
-  moveAmount += 1;
-  moveSlider();
-});
 
 function moveSlider() {
   slider.style.transition = transitionScheme;
@@ -66,55 +76,11 @@ function moveSlider() {
   slider.style.transform = `translateX(${amount}px)`;
 }
 
-/** PROTOTYPE
- *  an attempt to fix buggy translation when
- *  doing a translation >= 8 slides
- */
-// function moveSlider() {
-//   amount = (direction * (moveAmount-1) * size) + initSize;
-//   // amount = direction * moveAmount * size;
-//     console.log(`moveAm ${moveAmount}, size ${size}`);
-//   let x = counter; 
-//   slider.style.transition = 'none';
-//   while (moveAmount > 0) {
-//     slider.appendChild(slider.firstElementChild);
-//     moveAmount -= 1;
-//   }
-//   slider.style.transform = `translate(${initSize + (size*x)}px)`;
-//     console.log(
-//       `initSize ${initSize}
-//       size ${size}
-//       x ${x}`
-//     );
-
-// 	setTimeout( () => {
-//     slider.style.transition = transitionScheme;
-//     slider.style.transform = `translateX(${amount}px)`;
-// 	});
-// }
-
-slider.addEventListener('transitionend', () => {
-  while (moveAmount > 0) {
-    if (direction === 1) { // backwards
-      slider.prepend(slider.lastElementChild);
-    } else if (direction === -1) { // forwards
-      slider.appendChild(slider.firstElementChild);
-    }
-      moveAmount -= 1;
-  }
-
-	slider.style.transition = 'none';
-	slider.style.transform = `translate(${initSize}px)`;
-	setTimeout( () => {
-		slider.style.transition = transitionScheme;
-	})
-});
-
 function getDisplayIndex(counter, imgCount) {
   let displayIdx;
 
 	if (counter >= 0) {
-		displayIdx = Math.abs(counter) % imgCount;
+		displayIdx = counter % imgCount;
 	} else if (counter < 0) {
 		displayIdx = imgCount - (Math.abs(counter) % imgCount);
 		if (displayIdx === imgCount) displayIdx = 0;
@@ -130,11 +96,11 @@ function renderImg(e) {
     const delta = chosenImage - currentImage;
     counter += delta;
 
-    console.log(
-      `render: chosenImg ${chosenImage},
-      counter ${counter},
-      currentImg ${currentImage}`
-     );
+    // console.log(
+    //   `render: chosenImg ${chosenImage},
+    //   counter ${counter},
+    //   currentImg ${currentImage}`
+    //  );
 
     moveAmount = chosenImage - currentImage;
     if (moveAmount < 0) {
@@ -143,7 +109,7 @@ function renderImg(e) {
       direction = -1;
     }
     moveAmount = Math.abs(moveAmount);
-    console.log(`moveAmount: ${moveAmount}`);
+    // console.log(`moveAmount: ${moveAmount}`);
   }
 
   moveSlider();
@@ -175,51 +141,12 @@ function autoSlide() {
 	window.addEventListener('load', resetInterval);
 }
 
-function getJSON(url) {
-	return new Promise(function(resolve, reject) {
-		const xhr = new XMLHttpRequest;
-
-		xhr.onload = function() { // 404 goes here aswell
-			resolve(this);
-		};
-
-		xhr.onerror = function() {
-			reject(new Error("Network error"));
-		}
-
-		xhr.open('get', url);
-		xhr.send();
-	});
-}
-
-function init() {
-	getJSON("http://localhost:5000/images")
-		.then(parseJSON)
-		.catch(function (err) {
-			console.log(err);
-		})
-    .then(generateElements);
-		// .then(autoSlide);
-}
-
-function parseJSON(xhr) {
-	if (xhr.status !== 200) {
-		console.log("File or resource not found");
-	} else {
-		try {
-			return JSON.parse(xhr.responseText);
-		} catch (err) {
-			console.log(err);
-		}
-	}
-}
-
 function generateElements(jsonData) {
 	imageCount = jsonData.data.length;
 	const sliderImages = generateSlider(jsonData, imageCount);
 	alignSliderImages(sliderImages[0]);
   generateThumbBar(jsonData, imageCount);
- 
+
 	container.insertAdjacentHTML('beforeend', '<p class="image-current"></p>');
 	container.insertAdjacentHTML('beforeend', '<p class="image-name"></p>');
   container.insertAdjacentHTML('beforeend', '<p class="image-description"></p>');
@@ -228,7 +155,7 @@ function generateElements(jsonData) {
   
 	slider.addEventListener('transitionend', () => {
 		toggleActive(counter, imageCount);
-	});	
+  });	
 }
 
 function alignSliderImages(firstImage) {
@@ -263,7 +190,7 @@ function generateSlider(jsonData, count) {
       sliderImgDescr.setAttribute('class', 'img-description');
       sliderImgName.textContent = `${jsonData.data[displayIdx].name}`;
       sliderImgDescr.textContent = `${jsonData.data[displayIdx].short_description}`;
-      /** TODO: make text disappear if overflows in CSS
+      /** TODO: make text disappear if it 'overflows'
        *  only show text on current active image
        */
 			sliderDiv.appendChild(sliderImg);
@@ -309,4 +236,55 @@ function toggleActive(counter, imgCount) {
   imgCurrent.textContent = `Image ${displayIdx + 1} of ${imgCount}`;
 }
 
+/** Event Listeners */
+// Buttons
+nextBtn.addEventListener('click', () => {
+  direction = -1;
+  counter += 1;
+  moveAmount += 1;
+  moveSlider();
+});
+
+prevBtn.addEventListener('click', () => {
+  direction = 1;
+  counter -= 1;
+  moveAmount += 1;
+  moveSlider();
+});
+
+nextThumb.addEventListener('click', () => {
+  // 4 images displayed at 1st, so max 6 movements, hardcoded for now
+  if (thumbCount === 6) return;
+  else thumbCount += 1;
+
+  moveThumb();
+})
+prevThumb.addEventListener('click', () => {
+  if (thumbCount === 0) return;
+  else thumbCount -= 1;
+
+  moveThumb();
+})
+
+// Slider
+slider.addEventListener('transitionend', () => {
+  while (moveAmount > 0) {
+    if (direction === 1) { // backwards
+      slider.prepend(slider.lastElementChild);
+    } else if (direction === -1) { // forwards
+      slider.appendChild(slider.firstElementChild);
+    }
+      moveAmount -= 1;
+  }
+
+	slider.style.transition = 'none';
+	slider.style.transform = `translate(${initSize}px)`;
+	setTimeout( () => {
+		slider.style.transition = transitionScheme;
+	})
+});
+
+
+/** Initialize app */
 init();
+}());

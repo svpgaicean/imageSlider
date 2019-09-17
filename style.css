@@ -21,9 +21,9 @@ body {
 }
 .container2 {
 	position: relative;
+	/* width: 1280px; */
 	width: 640px;
-	margin-left: 320px;
-	margin-right: 320px;
+	margin: auto;
 	height: 112.5px;
 	overflow: hidden;
 	background: #000;
@@ -93,8 +93,19 @@ body {
 	color: #fff;
 }
 
+.image-current {
+	position: absolute;
+	bottom: 10px;
+	right: 26%;
+	font-size: 20px;
+	color: rgb(207, 0, 207);
+}
+
 .thumb-bar {
 	display: flex;
+	width: 640px;
+	/* border: 1px solid red; */
+	margin: auto;
 }
 .thumb-bar img {
 	flex-shrink: 1;
@@ -117,15 +128,18 @@ body {
 	outline: none;
 }
 .prevThumb {
+	/* left: 26%; */
 	left: 2%;
 	opacity: 0;
 	color: #eee;
 }
 .nextThumb {
-	right: 2%; 
+	/* right: 26%;  */
+	right: 2%;
 	opacity: 0;
 	color: #eee;
 }
+
 .prevThumb:hover {
 	transition: ease-in-out 0.3s;
 	opacity: 1;
