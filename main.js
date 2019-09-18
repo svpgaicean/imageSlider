@@ -1,13 +1,10 @@
 (function() { 
 'use strict';
+
+// Main Elements
 const thumbBar = document.querySelector('.thumb-bar');
 const slider = document.querySelector('.slider');
 const container = document.querySelector('.container');
-
-let size; // image width
-let initSize;
-
-const transitionScheme = 'transform 0.5s ease-in-out';
 
 // Buttons
 const nextBtn = document.querySelector('.nextBtn');
@@ -15,12 +12,23 @@ const prevBtn = document.querySelector('.prevBtn');
 const nextThumb = document.querySelector('.nextThumb');
 const prevThumb = document.querySelector('.prevThumb');
 
-// Counter
-let counter = 0;
+let size = 640;
+// let size; // image width; TOFIX: displacement will vary each image size
+// required for initial positioning of slider
+let initSize; /** TODO: give a decent name -- initDisplacement ? */
+
+const transitionScheme = 'transform 0.5s ease-in-out';
+
+// Local Variables 
+let counter = 0; // current position on slider
+/** number of images to transition over 
+ *  used to calculate individual size of all images used in translation
+ */
 let moveAmount = 0;
-let direction;
-let imageCount;
-let thumbCount = 0;
+// direction no longer used, moving everything based on displacement on X
+// let direction; // movement direction based on next/prev buttons
+let imageCount; // total number of images
+let thumbCount = 0; // counter for thumbBar images
 
 function init() {
 	getJSON("http://localhost:5000/images")
@@ -50,6 +58,9 @@ function getJSON(url) {
 }
 
 function parseJSON(xhr) {
+  /**
+   *  TODO: handle status codes based on class (2xx, 3xx, etc)
+   */
 	if (xhr.status !== 200) {
 		console.log("File or resource not found");
 	} else {
@@ -61,19 +72,20 @@ function parseJSON(xhr) {
 	}
 }
 
+function moveSlider() {
+  slider.style.transition = transitionScheme;
+  let amount = (counter * -size) + initSize;
+  slider.style.transform = `translateX(${amount}px)`;
+}
+
 function moveThumb() {
+  /** TODO:
+   *  i) move transition scheme to CSS (it's always the same)
+   *  ii) handle case where active image is not on thumbar current view
+   */
   thumbBar.style.transition = transitionScheme;
   let amount = -(thumbCount * (640/4));
   thumbBar.style.transform = `translateX(${amount}px)`;
-}
-
-function moveSlider() {
-  slider.style.transition = transitionScheme;
-
-  // console.log(`dir ${direction} moveAm ${moveAmount}`);
-  let amount = (direction * moveAmount * size) + initSize;
-
-  slider.style.transform = `translateX(${amount}px)`;
 }
 
 function getDisplayIndex(counter, imgCount) {
@@ -95,6 +107,7 @@ function renderImg(e) {
     const chosenImage = whichChild(e.target);
     const delta = chosenImage - currentImage;
     counter += delta;
+    // console.log(counter);
 
     // console.log(
     //   `render: chosenImg ${chosenImage},
@@ -104,25 +117,26 @@ function renderImg(e) {
 
     moveAmount = chosenImage - currentImage;
     if (moveAmount < 0) {
-      direction = 1;
+      // direction = 1;
     } else if (moveAmount > 0) {
-      direction = -1;
+      // direction = -1;
     }
-    moveAmount = Math.abs(moveAmount);
+    // moveAmount = Math.abs(moveAmount);
     // console.log(`moveAmount: ${moveAmount}`);
   }
 
   moveSlider();
 }
 
-function whichChild(elem){
+function whichChild(elem) {
   let i = 0;
   while ((elem = elem.previousSibling) != null) i += 1;
   return i;
 }
 
 function autoSlide() {
-	let intervalId;
+  let intervalId;
+  
 	function resetInterval() {
 		intervalId = setInterval(nextSlide, 5000);
 	}
@@ -143,7 +157,10 @@ function autoSlide() {
 
 function generateElements(jsonData) {
 	imageCount = jsonData.data.length;
-	const sliderImages = generateSlider(jsonData, imageCount);
+  // const sliderImages = generateSlider(jsonData, imageCount);
+  generateSlider(jsonData, imageCount);
+  addSliderExtremities();
+  const sliderImages = document.querySelectorAll('.slider img');
 	alignSliderImages(sliderImages[0]);
   generateThumbBar(jsonData, imageCount);
 
@@ -158,13 +175,40 @@ function generateElements(jsonData) {
   });	
 }
 
+function addSliderExtremities() {
+ // clone sliderImages 0 and 1
+ // clone sliderImages length and length-1
+ const children = [...slider.children];
+ const len = children.length;
+ const clone0 = children[0].cloneNode(true)
+ const clone1 = children[1].cloneNode(true)
+ const cloneN = children[len-1].cloneNode(true)
+ const cloneN1 = children[len-2].cloneNode(true)
+ clone0.setAttribute('class', 'cloneZERO');
+ slider.appendChild(clone0);
+ slider.appendChild(clone1);
+ slider.appendChild(cloneN1);
+ slider.appendChild(cloneN);
+ slider.prepend(slider.lastElementChild);
+ slider.prepend(slider.lastElementChild);
+}
+
 function alignSliderImages(firstImage) {
 	firstImage.addEventListener('load', () => {
-		size = firstImage.clientWidth;
-		initSize = -(size + size/2);
-		slider.prepend(slider.lastElementChild);
-		slider.prepend(slider.lastElementChild);
-		slider.style.transform = `translateX(${initSize}px)`;
+    const images = document.querySelectorAll('.slider img');
+    // console.log(images);
+    const one = images[0].clientWidth;
+    const two = images[1].clientWidth;
+    const three = images[2].clientWidth;
+    // console.log(`window: ${window.innerWidth}`);
+    // console.log(`
+    //   sizeC1 ${one}
+    //   sizeC ${two}
+    //   sizeDisp ${three}
+    // `);
+    initSize = -(one + two + three/2) + 1280/2;
+    // TODO: for fullscreen version use window.innerWidth instead of 1280px
+    slider.style.transform = `translateX(${initSize}px)`;
 	});
 }
 
@@ -208,7 +252,7 @@ function generateSlider(jsonData, count) {
 		}
   }
   
-	return document.querySelectorAll('.slider img'); 
+	// return document.querySelectorAll('.slider img'); 
 }
 
 function generateThumbBar(jsonData, count) {
@@ -239,16 +283,18 @@ function toggleActive(counter, imgCount) {
 /** Event Listeners */
 // Buttons
 nextBtn.addEventListener('click', () => {
-  direction = -1;
+  if (counter > imageCount) return;
   counter += 1;
   moveAmount += 1;
+
   moveSlider();
 });
 
 prevBtn.addEventListener('click', () => {
-  direction = 1;
+  if (counter < 0) return;
   counter -= 1;
-  moveAmount += 1;
+  moveAmount -= 1;
+  
   moveSlider();
 });
 
@@ -259,6 +305,7 @@ nextThumb.addEventListener('click', () => {
 
   moveThumb();
 })
+
 prevThumb.addEventListener('click', () => {
   if (thumbCount === 0) return;
   else thumbCount -= 1;
@@ -267,23 +314,20 @@ prevThumb.addEventListener('click', () => {
 })
 
 // Slider
-slider.addEventListener('transitionend', () => {
-  while (moveAmount > 0) {
-    if (direction === 1) { // backwards
-      slider.prepend(slider.lastElementChild);
-    } else if (direction === -1) { // forwards
-      slider.appendChild(slider.firstElementChild);
-    }
-      moveAmount -= 1;
+slider.addEventListener('transitionend', function() {
+  let amount = 0;
+  if (counter < 0) {
+    slider.style.transition = 'none';
+    counter = imageCount - 1;
+    amount = initSize - size * counter;
+    slider.style.transform = `translateX(${amount}px)`;
+  } else if (counter >= imageCount) {
+    slider.style.transition = 'none';
+    counter = 0;
+    amount = initSize;
+    slider.style.transform = `translateX(${amount}px)`;
   }
-
-	slider.style.transition = 'none';
-	slider.style.transform = `translate(${initSize}px)`;
-	setTimeout( () => {
-		slider.style.transition = transitionScheme;
-	})
 });
-
 
 /** Initialize app */
 init();
