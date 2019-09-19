@@ -17,7 +17,7 @@ let totalImages = 0;
 let sliderPosition = 0;
 let thumbBarPosition = 0;
 let initialDisplacement = 0;
-let currentDisplacement = 640;
+let currentDisplacement = 0;
 const transitionScheme = 'transform 0.5s ease-in-out';
 
 function init() {
@@ -64,7 +64,20 @@ function parseJSON(xhr) {
 
 function moveSlider() {
   slider.style.transition = transitionScheme;
-  let amount = -(sliderPosition * currentDisplacement) + initialDisplacement;
+  const images = document.querySelectorAll('.slider img');
+  // create array of slider images without clones 
+  const imagesArray = [...images].slice(2, images.length-2); 
+
+  currentDisplacement = 0;
+  if (sliderPosition === -1) {
+    currentDisplacement += -imagesArray[imagesArray.length-1].clientWidth;
+  } else {
+    for (let i = 0; i < sliderPosition; i++) {
+      currentDisplacement += imagesArray[i].clientWidth;
+    }
+  }
+
+  const amount = -(currentDisplacement) + initialDisplacement;
   slider.style.transform = `translateX(${amount}px)`;
 }
 
@@ -73,9 +86,9 @@ function moveThumb() {
    *  i) move transition scheme to CSS (it's always the same)
    *  ii) handle case where active image is not on thumbar current view
    */
-  thumbBar.style.transition = transitionScheme;
-  let amount = -(thumbBarPosition * (640/4));
-  thumbBar.style.transform = `translateX(${amount}px)`;
+  // thumbBar.style.transition = transitionScheme;
+  // let amount = -(thumbBarPosition * (640/4));
+  // thumbBar.style.transform = `translateX(${amount}px)`;
 }
 
 function renderImg(e) {
@@ -157,8 +170,7 @@ function alignSliderImages(firstImage) {
     const mainImgWidth = images[2].clientWidth;
     const mainImgCentered = mainImgWidth / 2;
 
-    initialDisplacement = -(firstImgWidth + secondImgWidth + mainImgCentered) + 1280 / 2;
-    // TODO: for fullscreen version use window.innerWidth instead of 1280px
+    initialDisplacement = -(firstImgWidth + secondImgWidth + mainImgCentered) + window.innerWidth/ 2;
     slider.style.transform = `translateX(${initialDisplacement}px)`;
 	});
 }
@@ -268,12 +280,12 @@ prevThumb.addEventListener('click', () => {
 });
 
 // Slider
-slider.addEventListener('transitionend', function() {
+slider.addEventListener('transitionend', () => {
   let amount = 0;
   if (sliderPosition < 0) {
     slider.style.transition = 'none';
     sliderPosition = totalImages - 1;
-    amount = initialDisplacement - currentDisplacement * sliderPosition;
+    amount = initialDisplacement + currentDisplacement * sliderPosition;
     slider.style.transform = `translateX(${amount}px)`;
   } else if (sliderPosition >= totalImages) {
     slider.style.transition = 'none';
@@ -281,6 +293,11 @@ slider.addEventListener('transitionend', function() {
     amount = initialDisplacement;
     slider.style.transform = `translateX(${amount}px)`;
   }
+});
+
+// Reload window on resize
+window.addEventListener('resize', () => {
+  location.reload();
 });
 
 /** Initialize app */
