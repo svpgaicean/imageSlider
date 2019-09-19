@@ -19,6 +19,15 @@ body {
 	margin: auto;
 	overflow: hidden;
 }
+.container2 {
+	position: relative;
+	/* width: 1280px; */
+	width: 640px;
+	margin: auto;
+	height: 112.5px;
+	overflow: hidden;
+	background: #000;
+}
 
 .container button {
 	position: absolute;
@@ -30,6 +39,7 @@ body {
 	transform: translateY(-50%);
 	outline: none;
 }
+
 .prevBtn {
 	left: 26%;
 }
@@ -64,33 +74,78 @@ body {
 }
 .slider img {
 	z-index: -1;
+	/* width: 640px; */
+	height: 480px;
+}
+
+.img-name {
+	position: absolute;
+	bottom: 50px;
+	padding-left: 20px;
+	width: 200px;
+	font-size: 26px;
+	color: rgb(157, 10, 255);
+}
+.img-description {
+	position: absolute;
+	bottom: 20px;
+	padding-left: 200px;
+	width: 400px;
+	color: #fff;
+}
+
+.image-current {
+	position: absolute;
+	bottom: 10px;
+	right: 26%;
+	font-size: 20px;
+	color: rgb(207, 0, 207);
 }
 
 .thumb-bar {
 	display: flex;
-	justify-content: center;
+	width: 640px;
+	/* border: 1px solid red; */
+	margin: auto;
 }
 .thumb-bar img {
-  width: 150px;
+	flex-shrink: 1;
+	width: calc(640px / 4);
 	cursor: pointer;
+	opacity: 0.6;
 }
 
-.dot-bar {
+.container2 .thumb-bar .active {
+	opacity: 1;
+}
+.container2 button {
 	position: absolute;
-	transform: translateX(-50%);
-	left: 50%;
-	bottom: 5%;
+	background: none;
+	border: none;
+	font-size: 40px;
+	font-style: normal;
+	top: 50%;
+	transform: translateY(-50%);
+	outline: none;
 }
-.dot {
-  cursor: pointer;
-  height: 15px;
-  width: 15px;
-  margin: 0 2px;
-  background-color: #bbb;
-  border-radius: 50%;
-  display: inline-block;
-  transition: background-color 0.6s ease;
+.prevThumb {
+	/* left: 26%; */
+	left: 2%;
+	opacity: 0;
+	color: #eee;
 }
-.active {
-	background-color: #9C0000;
+.nextThumb {
+	/* right: 26%;  */
+	right: 2%;
+	opacity: 0;
+	color: #eee;
+}
+
+.prevThumb:hover {
+	transition: ease-in-out 0.3s;
+	opacity: 1;
+}
+.nextThumb:hover {
+	transition: ease-in-out 0.3s;
+	opacity: 1;
 }
