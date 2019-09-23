@@ -10,7 +10,7 @@ h1 {
 }
 
 body {
-	background: #eee;
+	background: #000;
 }
 
 .container {
@@ -48,7 +48,6 @@ body {
 
 .slider {
 	display: flex;
-	/* height: 480px; */
 }
 .slider img {
 	z-index: -1;
@@ -81,12 +80,10 @@ body {
 
 .thumb-bar {
 	display: flex;
-	/* width: 640px; */
 	margin: auto;
 }
 .thumb-bar img {
 	flex-shrink: 1;
-	/* width: calc(640px / 4); */
 	height: 15vh;
 	cursor: pointer;
 	opacity: 0.6;
@@ -123,4 +120,8 @@ body {
 .nextThumb:hover {
 	transition: ease-in-out 0.3s;
 	opacity: 1;
+}
+
+[hidden] {
+	display: none;
 }

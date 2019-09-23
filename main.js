@@ -183,6 +183,7 @@
     function allImagesLoaded() {
       console.log('all images loaded');
 
+      showElements();
       alignSliderImages(sliderImages[0]);
       generateThumbBar(jsonData);
 
@@ -228,8 +229,6 @@
     // });
   }
 
-
-
   function generateSlider(jsonData) {
     let count = totalImages;
     for (let i = 0; i < count; i++) {
@@ -244,22 +243,28 @@
       sliderImgDescr.setAttribute('class', 'img-description');
       sliderImgName.textContent = `${jsonData[i].id}`;
       sliderImgDescr.textContent = `${jsonData[i].alt_description}`;
-      /** TODO: make text disappear if it 'overflows'
-       *  only show text on current active image
-       */
+
+      sliderDiv.hidden = true;
       sliderDiv.appendChild(sliderImg);
       sliderDiv.appendChild(sliderImgName);
       sliderDiv.appendChild(sliderImgDescr);
       slider.appendChild(sliderDiv);
     }
-    /** TOFIX: was working for old slider implementation */
-    // append clone elements to slider for correct behaviour 
     const children = [...slider.children];
     while (count < 5) {
       const clones = children.map(child => child.cloneNode(true));
       clones.forEach(clone => slider.appendChild(clone));
       count += clones.length;
     }
+  }
+
+  function showElements() {
+    const div = document.querySelectorAll('.slider div');
+    for (let i = 0; i < div.length; i++) {
+      div[i].hidden = false;
+    }
+    nextBtn.hidden = false;
+    prevBtn.hidden = false;
   }
 
   function generateThumbBar(jsonData) {
