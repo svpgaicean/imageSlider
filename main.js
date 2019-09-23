@@ -13,7 +13,6 @@
   const prevThumb = document.querySelector('.prevThumb');
 
   // Local Variables 
-  let totalImages = 0;
   let sliderPosition = 0;
   let thumbBarPosition = 0;
   let initialDisplacement = 0;
@@ -21,8 +20,12 @@
   let rotationDisplacement = 0;
   const transitionScheme = 'transform 0.5s ease-in-out';
 
+  let loadedImages = 0; // loaded images count
+  const totalImages = 10; // used as value of count parameter in url
+  const url = `https://api.unsplash.com/photos/random/?client_id=e68b2f2480be25aee3cb4b64b08a9bc79bd9eddf1489b7e12c2da671d70b6e35&count=${totalImages}`;
+
   function init() {
-    getJSON("http://localhost:5000/images")
+    getJSON(url)
       .then(parseJSON)
       .catch(function (err) {
         console.log(err);
@@ -155,22 +158,44 @@
   }
 
   function generateElements(jsonData) {
-    totalImages = jsonData.data.length;
     generateSlider(jsonData);
     addSliderExtremities();
+
     const sliderImages = document.querySelectorAll('.slider img');
-    alignSliderImages(sliderImages[0]);
-    generateThumbBar(jsonData);
+    console.log(`sliderImages ${sliderImages.length}`);
+    // if images loaded -> do magical things below
+    // else, do whatever while loadingggggggggggg
+    [].forEach.call(sliderImages, function(img) {
+      img.addEventListener('load', imageLoaded);
+    })
+  
+    function imageLoaded() {
+      loadedImages += 1;
+      console.log(`loadedImages ${loadedImages}`);
+      if (loadedImages === sliderImages.length) {
+        allImagesLoaded();
+      } else {
+        // insert loading message or whatever
+        console.log('images still loading');
+      }
+    }
+    
+    function allImagesLoaded() {
+      console.log('all images loaded');
 
-    container.insertAdjacentHTML('beforeend', '<p class="image-current"></p>');
-    container.insertAdjacentHTML('beforeend', '<p class="image-name"></p>');
-    container.insertAdjacentHTML('beforeend', '<p class="image-description"></p>');
+      alignSliderImages(sliderImages[0]);
+      generateThumbBar(jsonData);
 
-    toggleActive();
+      container.insertAdjacentHTML('beforeend', '<p class="image-current"></p>');
+      container.insertAdjacentHTML('beforeend', '<p class="image-name"></p>');
+      container.insertAdjacentHTML('beforeend', '<p class="image-description"></p>');
 
-    slider.addEventListener('transitionend', () => {
       toggleActive();
-    });
+
+      slider.addEventListener('transitionend', () => {
+        toggleActive();
+      });
+    }
   }
 
   function addSliderExtremities() {
@@ -190,7 +215,8 @@
   }
 
   function alignSliderImages(firstImage) {
-    firstImage.addEventListener('load', () => {
+    // firstImage.addEventListener('load', () => {
+      console.log('----> aligned');
       const images = document.querySelectorAll('.slider img');
       const firstImgWidth = images[0].clientWidth;
       const secondImgWidth = images[1].clientWidth;
@@ -199,8 +225,10 @@
 
       initialDisplacement = -(firstImgWidth + secondImgWidth + mainImgCentered) + window.innerWidth / 2;
       slider.style.transform = `translateX(${initialDisplacement}px)`;
-    });
+    // });
   }
+
+
 
   function generateSlider(jsonData) {
     let count = totalImages;
@@ -210,12 +238,12 @@
       const sliderImgName = document.createElement('p');
       const sliderImgDescr = document.createElement('p');
 
-      sliderImg.setAttribute('src', `${jsonData.data[i].url}`);
-      sliderImg.setAttribute('alt', `${jsonData.data[i].name}`);
+      sliderImg.setAttribute('src', `${jsonData[i].urls.full}`);
+      sliderImg.setAttribute('alt', `${jsonData[i].id}`);
       sliderImgName.setAttribute('class', 'img-name');
       sliderImgDescr.setAttribute('class', 'img-description');
-      sliderImgName.textContent = `${jsonData.data[i].name}`;
-      sliderImgDescr.textContent = `${jsonData.data[i].short_description}`;
+      sliderImgName.textContent = `${jsonData[i].id}`;
+      sliderImgDescr.textContent = `${jsonData[i].alt_description}`;
       /** TODO: make text disappear if it 'overflows'
        *  only show text on current active image
        */
@@ -238,8 +266,8 @@
     let count = totalImages;
     for (let i = 0; i < count; i++) {
       const newThumbImg = document.createElement('img');
-      newThumbImg.setAttribute('src', `${jsonData.data[i].url}`);
-      newThumbImg.setAttribute('alt', `${jsonData.data[i].name}`);
+      newThumbImg.setAttribute('src', `${jsonData[i].urls.full}`);
+      newThumbImg.setAttribute('alt', `${jsonData[i].id}`);
       if (i === 0) {
         newThumbImg.setAttribute('class', ' active');
       }
