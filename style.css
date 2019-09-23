@@ -125,3 +125,20 @@ body {
 [hidden] {
 	display: none;
 }
+
+.loader {
+	position: absolute;
+  border: 16px solid #909090; /* Dark grey */
+  border-top: 16px solid #d11313; /* Red */
+  border-radius: 50%;
+  width: 120px;
+	height: 120px;
+	top: 40%;
+	left: 50%;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

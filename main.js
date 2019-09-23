@@ -31,7 +31,7 @@
         console.log(err);
       })
       .then(generateElements)
-    // .then(autoSlide);
+      .then(autoSlide);
   }
 
   function getJSON(url) {
@@ -162,29 +162,23 @@
     addSliderExtremities();
 
     const sliderImages = document.querySelectorAll('.slider img');
-    console.log(`sliderImages ${sliderImages.length}`);
-    // if images loaded -> do magical things below
-    // else, do whatever while loadingggggggggggg
     [].forEach.call(sliderImages, function(img) {
       img.addEventListener('load', imageLoaded);
     })
   
     function imageLoaded() {
       loadedImages += 1;
-      console.log(`loadedImages ${loadedImages}`);
       if (loadedImages === sliderImages.length) {
         allImagesLoaded();
       } else {
-        // insert loading message or whatever
         console.log('images still loading');
       }
     }
     
     function allImagesLoaded() {
-      console.log('all images loaded');
-
+      document.querySelector('.loader').hidden = true;
       showElements();
-      alignSliderImages(sliderImages[0]);
+      alignSliderImages();
       generateThumbBar(jsonData);
 
       container.insertAdjacentHTML('beforeend', '<p class="image-current"></p>');
@@ -215,18 +209,15 @@
     slider.prepend(slider.lastElementChild);
   }
 
-  function alignSliderImages(firstImage) {
-    // firstImage.addEventListener('load', () => {
-      console.log('----> aligned');
-      const images = document.querySelectorAll('.slider img');
-      const firstImgWidth = images[0].clientWidth;
-      const secondImgWidth = images[1].clientWidth;
-      const mainImgWidth = images[2].clientWidth;
-      const mainImgCentered = mainImgWidth / 2;
+  function alignSliderImages() {
+    const images = document.querySelectorAll('.slider img');
+    const firstImgWidth = images[0].clientWidth;
+    const secondImgWidth = images[1].clientWidth;
+    const mainImgWidth = images[2].clientWidth;
+    const mainImgCentered = mainImgWidth / 2;
 
-      initialDisplacement = -(firstImgWidth + secondImgWidth + mainImgCentered) + window.innerWidth / 2;
-      slider.style.transform = `translateX(${initialDisplacement}px)`;
-    // });
+    initialDisplacement = -(firstImgWidth + secondImgWidth + mainImgCentered) + window.innerWidth / 2;
+    slider.style.transform = `translateX(${initialDisplacement}px)`;
   }
 
   function generateSlider(jsonData) {
