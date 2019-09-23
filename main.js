@@ -164,14 +164,12 @@
     const sliderImages = document.querySelectorAll('.slider img');
     [].forEach.call(sliderImages, function(img) {
       img.addEventListener('load', imageLoaded);
-    })
+    });
   
     function imageLoaded() {
       loadedImages += 1;
       if (loadedImages === sliderImages.length) {
         allImagesLoaded();
-      } else {
-        console.log('images still loading');
       }
     }
     
